@@ -11,7 +11,7 @@ class StudyLog:
     def answer (self, obj: object):
         self.print_string += "\n\x1b[35m---Відповідь---\x1b[0m"
         for string in obj.keys():
-            self.print_string += f'\n\x1b[32m {string}=\x1b[0m {obj[string]}'
+            self.print_string += f'\n\x1b[32m {string} =\x1b[0m {obj[string]}'
     
     def task (self, name: str or int):
         self.print_string += f"\n\x1b[33m---Завдання \x1b[36m'{name}'\x1b[0m"

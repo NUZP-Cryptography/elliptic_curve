@@ -1,3 +1,7 @@
+import sys
+# adding modules from parent directory to the system path
+sys.path.append('../crypto')
+
 import crypto_ec as ec
 from study_log import StudyLog
 

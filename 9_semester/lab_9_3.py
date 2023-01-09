@@ -1,7 +1,12 @@
+import sys
+# adding modules from parent directory to the system path
+sys.path.append('../crypto')
+
 import crypto_ec as ec
 from study_log import StudyLog
 
 if __name__ == '__main__':
+
     log = StudyLog()
     m = 5
     a = ec.Element.from_number(0)
@@ -25,11 +30,12 @@ if __name__ == '__main__':
     log.add_point(log.green('P'), 'належить заданій елептичній кривій оскільки:', log.green(left), '=', log.green(right))
 
     log.task("Для точки P обчислить 2P, 3P, 4P, …")
-    for i in range(2, 10):
+    for i in range(2, 20):
         log.add_point(f'Обчислимо {i}P =', log.green(EE5.mul_number_point(i, P)))
     
-    log.answer({'period': 32, '32P': EE5.mul_number_point(32, P)})
+    log.answer({'period': 32, '32P': EE5.mul_number_point(33, P)})
     log.print()
+
     # P_test = ec.Point(ec.Element.from_string('t+1'), ec.Element.from_string('t+1'))
     # ƒ3 = ec.Element.from_string('t^3+t+1')
     # EC3 = ec.EllipticCurve(ƒ3, m)
