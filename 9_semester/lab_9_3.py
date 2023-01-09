@@ -28,6 +28,7 @@ if __name__ == '__main__':
     for i in range(2, 10):
         log.add_point(f'Обчислимо {i}P =', log.green(EE5.mul_number_point(i, P)))
     
+    log.answer({'period': 32, '32P': EE5.mul_number_point(32, P)})
     log.print()
     # P_test = ec.Point(ec.Element.from_string('t+1'), ec.Element.from_string('t+1'))
     # ƒ3 = ec.Element.from_string('t^3+t+1')
