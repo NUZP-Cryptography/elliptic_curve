@@ -1,5 +1,6 @@
 import numpy as np
 from typing import TypeVar
+import math
 
 SelfPoint = TypeVar("SelfPoint", bound="Point")
 SelfElement = TypeVar("SelfElement", bound="Element")
@@ -18,6 +19,13 @@ class Point:
         reversed_y = self.x + self.y
         if(self.y != other.y and reversed_y != other.y): return False
         return True
+    
+    def negative(self, f: SelfElement = None) -> SelfPoint:
+        y = f and (self.x + self.y) % f or self.x + self.y
+        return Point(self.x, y)
+    
+    def copy(self) -> SelfPoint:
+        return Point(self.x.copy(), self.y.copy())
 
 class Element:
     def __init__(self: SelfElement, *args:list[int]) -> SelfElement:
@@ -210,8 +218,51 @@ class EllipticEquation:
 
                 return Point(x, y)
     
-    def mul_number_point(self, k: int, point: Point) -> Point:
-        _point = point
+    def mul_number_point (self, k: int, point: Point) -> Point:
+        _point_1 = k >= 0 and point or point.negative( self.ec.f )
+        _point_2 = k >= 0 and point or point.negative( self.ec.f )
+        k = abs(k)
         for i in range(k - 1):
-            _point = self.add_points(point, _point)
-        return _point
+            _point_2 = self.add_points(_point_1, _point_2)
+        return _point_2
+
+    def define_y(self, x: Element) -> Point:
+        w = self.ec.mod((x**3) + (self.a*(x**2)) + self.b)
+        if(x == Element.from_number(0)):
+            y = self.ec.pow_elements(w, (-2))
+            return Point(x, y)
+        elif(w == Element.from_number(0)):
+            y = Element.from_number(0)
+            return Point(x, y)
+        else:
+            s = self.ec.mul_elements(w, self.ec.pow_elements(x, -2))
+            tr = self.ec.trace_of_element(s)
+            if(tr == Element.from_number(1)):
+                y = Element.from_number(0)
+                return Point(x, y)
+            else:
+                s_tr = self.ec.semitrace_of_element(s)
+                y = self.ec.mod(s_tr * x)
+                return Point(x, y)
+        raise Exception(f'Can`t find point by x (\x1b[32m{x}\x1b[0m)')
+
+    def order_of_point (self, point: Point) -> int:
+        q = 2 ** (self.ec.f.len() - 1)
+        max_point = math.floor(q + 1 + 2 * (q ** 0.5))
+        k = math.ceil(max_point ** 0.5)
+        table_of_point: list[Point] = [point]
+        alpha = self.mul_number_point(-k, point)
+        gama = alpha.copy()
+
+        for i in range(1, k):
+            table_of_point.append(self.mul_number_point(i, point))
+            
+        i, j = 1, 0 # can break
+        while not(gama in table_of_point): 
+            if(i > q): raise Exception(f'Can`t find order of point (\x1b[32m{point}\x1b[0m)')
+            i += 1
+            gama = self.add_points(alpha, gama)
+
+        for j in range(1, len(table_of_point)):
+            if(table_of_point[j] == gama): break
+        return k * i + j 
