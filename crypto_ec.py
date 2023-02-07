@@ -82,6 +82,13 @@ class Element:
     def copy(self) -> SelfElement:
         return Element(*self.args)
 
+    def toInt(self) -> int:
+        res = 0
+        length = self.len()
+        for i in range(0, length):
+            if(self.args[length - i - 1] != 0): res += 2 ** i
+        return res
+
     @staticmethod
     def normalize(value):
         for i in range(len(value)):
@@ -138,7 +145,6 @@ class EllipticCurve:
             for j in range(i):
                 polynomial.append(Element(0))
             remainder = polynomial % self.f
-            print(i, remainder)
             self.polynomial_table.append([polynomial, remainder])
 
     def mod (self, value: Element) -> Element:
@@ -168,7 +174,8 @@ class EllipticCurve:
         numerator = el1.copy()
         for i in range(1, 2 ** self.m):
             # print('\x1b[32m', numerator, '\x1b[0m%\x1b[33m', el2, '\x1b[0m=\x1b[31m', numerator % el2, '\x1b[0m')
-            if((numerator % el2) == Element(0)): return (numerator / el2) % self.f
+            if((numerator % el2) == Element(0)): 
+                return (numerator / el2) % self.f
             numerator = numerator + (self.f * (Element.from_pow(i) % self.f))
 
     def trace_of_element(self, el: Element) -> Element:
@@ -218,11 +225,38 @@ class EllipticEquation:
 
                 return Point(x, y)
     
+    def new_mul_number_point (self, k: int, point: Point) -> Point:
+        _point_1 = k >= 0 and point or point.negative( self.ec.f )
+        _point_2 = k >= 0 and point or point.negative( self.ec.f )
+        answer: Point = _point_2
+        k = abs(k)
+        steps = [int(x) for x in bin(k)[2:]]
+        steps.reverse()
+        pows = []
+        for j in range(len(steps)):
+            if(steps[j] != 0):
+                pows.append(2**j)
+        i = 1
+        d = 0
+        while d != len(pows):
+            if(i < 1 or i + i > k):
+                _point_2 = self.add_points(_point_1, _point_2)
+                i += 1
+            else:
+                _point_2 = self.add_points(_point_2.copy(), _point_2)
+                i += i
+            if(i in pows):
+                if d < 1: answer = _point_2
+                else: answer = self.add_points(answer.copy(), _point_2)
+                d += 1
+        return answer
+    
     def mul_number_point (self, k: int, point: Point) -> Point:
         _point_1 = k >= 0 and point or point.negative( self.ec.f )
         _point_2 = k >= 0 and point or point.negative( self.ec.f )
         k = abs(k)
         for i in range(k - 1):
+            # print(i, _point_2)
             _point_2 = self.add_points(_point_1, _point_2)
         return _point_2
 
@@ -253,16 +287,31 @@ class EllipticEquation:
         table_of_point: list[Point] = [point]
         alpha = self.mul_number_point(-k, point)
         gama = alpha.copy()
-
         for i in range(1, k):
             table_of_point.append(self.mul_number_point(i, point))
-            
         i, j = 1, 0 # can break
         while not(gama in table_of_point): 
             if(i > q): raise Exception(f'Can`t find order of point (\x1b[32m{point}\x1b[0m)')
             i += 1
             gama = self.add_points(alpha, gama)
-
         for j in range(1, len(table_of_point)):
             if(table_of_point[j] == gama): break
         return k * i + j 
+    
+    def get_point_by_order(self, order: int) -> Point:
+        q = 2 ** (self.ec.f.len() - 1)
+        max_point = math.floor(q + 1 + 2 * (q ** 0.5))
+        k = math.ceil(max_point ** 0.5)
+        j = order % k
+        i = int((order - j) / k)
+
+        res: Point
+
+        for x in range(1, self.ec.f.toInt()):
+            point = self.define_y(self.ec.input(x))
+            k_point = self.mul_number_point(-k, point.copy())
+            j_point = self.mul_number_point(j, point.copy())
+            i_point = self.mul_number_point(i, k_point.copy())
+            if(j_point != i_point): continue
+            res = point
+        return res

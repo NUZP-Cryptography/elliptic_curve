@@ -37,7 +37,7 @@ if __name__ == '__main__':
         log.add_point('Виконаємо розрахунок s = w * x^2 =', log.green(s))
 
         tr = EC5.trace_of_element(s)
-        log.add_point('Виконаємо розрахунок сліду елемента s: tr = f_tr(s) =', log.green(s))
+        log.add_point('Виконаємо розрахунок сліду елемента s: tr = f_tr(s) =', log.green(tr))
 
         if(tr == ec.Element.from_number(1)):
             q = y = ec.Element.from_number(0)
@@ -45,8 +45,7 @@ if __name__ == '__main__':
             log.answer({"Точка": ec.Point(x, y)})
         else:
             s_tr = EC5.semitrace_of_element(s)
-            log.add_point('Виконаємо розрахунок напівсліду елемента s: s_tr = f_str(s) =', log.green(s))
-    
+            log.add_point('Виконаємо розрахунок напівсліду елемента s: s_tr = f_str(s) =', log.green(s_tr))
             q = y = EC5.mod(s_tr * u)
             log.add_point('Обчислимоелемент основного поля q = y = s_tr * u =', log.green(y))
             log.answer({"Точка": ec.Point(x, y)})
