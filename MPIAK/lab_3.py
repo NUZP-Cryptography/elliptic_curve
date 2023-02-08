@@ -252,6 +252,13 @@ if __name__ == '__main__':
         array_of_B.append(B)
 
     log.task("Знайдемо Zi та Zj")
+    table = '\n№\t| Point \t| A\t| B'
+    for i in range(0, len(array_of_Z)):
+        if(i == index or i == len(array_of_Z) - 1):
+            table += f'\n\x1b[32m{i}\t| ({array_of_Z[i].x}, {array_of_Z[i].y})\t| {array_of_A[i]}\t| {array_of_B[i]}\x1b[0m'
+            continue
+        table += f'\n{i}\t| ({array_of_Z[i].x}, {array_of_Z[i].y})\t| {array_of_A[i]}\t| {array_of_B[i]}'
+    log.add_point(table)
     log.add_point("ZI =", ZI)
     log.add_point("Z0 =", array_of_Z[index])
     log.add_point("ZI == Z0 :", ZI == array_of_Z[index])
@@ -261,8 +268,13 @@ if __name__ == '__main__':
     log.add_point("B", B)
     log.add_point("A0", array_of_A[index])
     log.add_point("B0", array_of_B[index])
+    log.add_point("d :", d)
 
-    log.answer({"d": d})
+    log.task("Перевіримо значення d")
+    log.add_point("Q = d * P =", EE.mult(P, int(d)))
+    log.add_point("Q що дана за умовою =", Q)
+
+    log.answer({"d": int(d)})
 
     log.print()
     
